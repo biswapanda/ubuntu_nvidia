@@ -1,0 +1,59 @@
+1. Install Ubuntu.
+-----------------------------------------
+install 12.04 LTS from iso/usb
+nouveau works fine. Recogizes Display as [Aculab Ltd 27"]
+Don't take out the USB we need live CD for fixing grub..
+
+2. Fix grub.
+-----------------------------------------
+Install and run boot-repair.
+Boot using a live usb/cd of ubuntu.
+Use boot-repair to fix the problem.
+After booting with live usb/cd
+Run following command in terminal,
+#####################################
+sudo add-apt-repository ppa:yannubuntu/boot-repair
+sudo apt-get update
+sudo apt-get install -y boot-repair
+boot-repair
+#####################################
+Use Recomended Repair
+At the end it will give a link , note it down before rebooting. If the above doesn't work just post that url here.
+
+3. Install Cuda and + driver
+-----------------------------------------
+gksu gedit /etc/modprobe.d/blacklist.conf
+Add below content:
+blacklist amd76x_edac
+blacklist vga16fb
+blacklist nouveau
+blacklist rivafb
+blacklist nvidiafb
+blacklist rivatv
+
+sudo apt-get -y remove --purge nvidia*
+sudo service lightdm stop
+copy edid-shimiam, xorg.conf into /etc/X11
+sudo chmod a+x cuda_6.0.37_linux_64.run
+./cuda_6.0.37_linux_64.run
+#go along with default settings.
+chown biswa:biswa ~/home/biswa/.Xauthority
+cat /proc/driver/nvidia/version
+CUDA_HOME=/usr/local/cuda-6.0
+export LD_LIBRARY_PATH=${CUDA_HOME}/lib64
+PATH=${CUDA_HOME}/bin:${PATH}
+export PATH
+
+4. Install pycuda and build cuda samples
+-----------------------------------------
+sudo apt-get install -y python-dev pyhon-pip g++
+sudo pip install numpy
+python ./configure.py --cuda-root=/usr/local/cuda-6.0
+make -j 8
+sudo make install
+cd test/
+python test_driver.py
+#cuda-install-samples-6.0.sh ~
+cd NVIDIA_CUDA-6.0_Samples
+make
+/home/biswa/NVIDIA_CUDA-6.0_Samples/bin/x86_64/linux/release/deviceQuery
